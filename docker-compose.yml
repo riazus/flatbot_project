@@ -1,0 +1,70 @@
+version: "3.9"
+services:
+  # ------------------------------------------------------------
+  # PostreSQL - Database
+  # ------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: flatbot_db
+    hostname: ${POSTGRES_HOST}
+    environment:
+        PGDATA: /var/lib/postgresql/data
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+        - pgdata:/var/lib/postgresql/data
+    ports:
+        - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    networks:
+        - flatbot-network
+    restart: unless-stopped
+
+  # ------------------------------------------------------------
+  # Parser service - flatbot_parser
+  # ------------------------------------------------------------
+  flatbot_parser:
+    container_name: flatbot_parser
+    build: 
+      context: ./flatbot
+    environment:
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_HOST: ${POSTGRES_HOST}
+        POSTGRES_PORT: ${POSTGRES_PORT}
+    depends_on:
+      - db
+    networks:
+      - flatbot-network
+    restart: unless-stopped
+
+  # ------------------------------------------------------------
+  # API app - flatbot_tg
+  # ------------------------------------------------------------
+  flatbot_tg:
+    container_name: flatbot_tg
+    build: 
+      context: ./flatbot_tg
+    environment:
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_HOST: ${POSTGRES_HOST}
+        POSTGRES_PORT: ${POSTGRES_PORT}
+    depends_on:
+      - flatbot_parser
+    command:
+      - sh
+      - -c
+      - npm run build && npm run start
+    networks:
+      - flatbot-network
+    restart: unless-stopped
+
+volumes:
+    pgdata:
+
+networks:
+  flatbot-network:
+    driver: bridge
