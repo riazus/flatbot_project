@@ -38,4 +38,4 @@ mclean: fclean clean-dev clean-docker
 
 re: mclean all
 
-.PHONY: dev prod fb_tg fb_parser clean fclean clean-dev clean-docker mclean
+.PHONY: dev prod tg parser clean fclean clean-dev clean-docker mclean
