@@ -1,3 +1,6 @@
 [submodule "parser"]
 	path = parser
 	url = git@github.com:vladislavkubrak/flatbot.git
+[submodule "flatbot_tg"]
+	path = flatbot_tg
+	url = git@github.com:riazus/flatbot_tg.git
